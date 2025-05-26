@@ -12,7 +12,9 @@
         "composer.lock",
         ".env"
     ],
-    "exclude-composer-files": false,
+
+    "stub": true,
+    "exclude-composer-files": true,
     "exclude-dev-files": true,
     "compression": "GZ",
     "algorithm": "SHA256"
