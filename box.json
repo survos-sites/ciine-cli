@@ -1,0 +1,19 @@
+{
+    "main": "bin/console",
+    "output": "app.phar",
+    "directories": [
+        "bin",
+        "config",
+        "src",
+        "vendor"
+    ],
+    "files": [
+        "composer.json",
+        "composer.lock",
+        ".env"
+    ],
+    "exclude-composer-files": false,
+    "exclude-dev-files": true,
+    "compression": "GZ",
+    "algorithm": "SHA256"
+}
