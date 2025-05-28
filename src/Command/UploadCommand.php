@@ -9,18 +9,21 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
+use Symfony\Component\Finder\Finder;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
-#[AsCommand('ciine:upload', 'upload a Asciinema file or directory to SurvosCiine site', aliases: ['upload'])]
-class UploadCommand
+#[AsCommand('upload', 'upload a Asciinema file or directory to SurvosCiine site', aliases: ['ciine:upload'])]
+class UploadCommand extends Command
 {
     public function __construct(
-        private readonly HttpClientInterface                        $httpClient,
         #[Autowire('%kernel.project_dir%')] private readonly string $projectDir,
-        private array $config = [],
-        private ?string $apiEndpoint=null,
+        private readonly ?HttpClientInterface                        $httpClient=null,
+//        private array $config = [],
+//        private ?string $apiEndpoint=null,
+        private ?string $name = null
     )
     {
+        parent::__construct($this->name);
     }
 
 
@@ -30,10 +33,17 @@ class UploadCommand
         #[Option(name: 'server-url', description: 'api endpoint')] string $apiEndpoint = '',
     ): int
     {
+
 //        SCREENSHOW_ENDPOINT=https://show.survos.com/api/asciicasts
 
         if (!$apiEndpoint) {
             $apiEndpoint = 'https://showcase.wip/api/asciicasts';
+        }
+        if (is_dir($path)) {
+            $zipFilename = realpath($path) . '.zip';
+            $this->zipDirectory($path, $zipFilename);
+            $path = $zipFilename;
+            // zip it up
         }
         if (!file_exists($path)) {
             $path = $this->projectDir . $path;
@@ -74,7 +84,7 @@ class UploadCommand
         return Command::SUCCESS;
     }
 
-    public static function displayArray(SymfonyStyle $io, array $data, string $title = null): void
+    public static function displayArray(SymfonyStyle $io, array $data=[], ?string $title = null): void
     {
         if ($title) {
             $io->section($title);
@@ -115,5 +125,29 @@ class UploadCommand
             is_string($value) => $value,
             default => (string) $value
         };
+    }
+
+    private function zipDirectory(string $sourceDir, string $zipFilePath): void
+    {
+        if (!extension_loaded('zip')) {
+            throw new \RuntimeException('ZIP extension not available.');
+        }
+
+        $zip = new \ZipArchive();
+
+        if ($zip->open($zipFilePath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) !== true) {
+            throw new \RuntimeException("Cannot create ZIP file at: $zipFilePath");
+        }
+
+        $finder = new Finder();
+        $finder->files()->in($sourceDir);
+
+        foreach ($finder as $file) {
+            $realPath = $file->getRealPath();
+            $relativePath = $file->getRelativePathname(); // keeps folder structure
+            $zip->addFile($realPath, $relativePath);
+        }
+
+        $zip->close();
     }
 }

@@ -1,6 +1,6 @@
 {
-    "main": "bin/console",
-    "output": "app.phar",
+    "main": "bin/myapp",
+    "output": "ciine.phar",
     "directories": [
         "bin",
         "config",
