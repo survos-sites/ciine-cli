@@ -10,6 +10,8 @@ use Symfony\Component\Console\Helper\TableSeparator;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Component\Finder\Finder;
+use Symfony\Component\Process\Exception\ProcessFailedException;
+use Symfony\Component\Process\Process;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
 #[AsCommand('upload', 'upload a Asciinema file or directory to SurvosCiine site', aliases: ['ciine:upload'])]
@@ -26,6 +28,27 @@ class UploadCommand extends Command
         parent::__construct($this->name);
     }
 
+    /* move to SurvosUtils? */
+    private function getMostRecentFile(string $directory): ?string
+    {
+        $latestFile = null;
+        $latestTime = 0;
+
+        foreach (new \DirectoryIterator($directory) as $file) {
+            if (!$file->isFile()) {
+                continue;
+            }
+
+            $mtime = $file->getMTime();
+            if ($mtime > $latestTime) {
+                $latestTime = $mtime;
+                $latestFile = $file->getRealPath();
+            }
+        }
+
+        return $latestFile;
+    }
+
 
     public function __invoke(
         SymfonyStyle                                                      $io,
@@ -33,6 +56,23 @@ class UploadCommand extends Command
         #[Option(name: 'server-url', description: 'api endpoint')] string $apiEndpoint = '',
     ): int
     {
+        $filenameTemplate = getenv("CIINE_PATH");
+        $currentPath = pathinfo($filenameTemplate, PATHINFO_DIRNAME);
+        $castDir = getenv("CIINE_PATH") . '/' . pathinfo(getcwd(), PATHINFO_BASENAME);
+
+
+        $mostRecent =  $this->getMostRecentFile($castDir);
+        $process = new Process(['asciinema', 'play', $mostRecent, '-s', '2.0', '-i', 0.5]);
+        $process->run();
+
+// executes after the command finishes
+        if (!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
+
+        echo $process->getOutput();
+
+        dd($_ENV, getenv("CIINE_PATH"), $currentPath, pathinfo(getcwd(), PATHINFO_BASENAME));
 
 //        SCREENSHOW_ENDPOINT=https://show.survos.com/api/asciicasts
 
