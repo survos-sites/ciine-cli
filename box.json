@@ -1,5 +1,5 @@
 {
-    "main": "bin/myapp",
+    "main": "bin/ciine  ",
     "output": "ciine.phar",
     "directories": [
         "bin",

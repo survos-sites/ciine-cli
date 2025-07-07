@@ -59,20 +59,21 @@ class UploadCommand extends Command
         $filenameTemplate = getenv("CIINE_PATH");
         $currentPath = pathinfo($filenameTemplate, PATHINFO_DIRNAME);
         $castDir = getenv("CIINE_PATH") . '/' . pathinfo(getcwd(), PATHINFO_BASENAME);
-
-
         $mostRecent =  $this->getMostRecentFile($castDir);
-        $process = new Process(['asciinema', 'play', $mostRecent, '-s', '2.0', '-i', 0.5]);
-        $process->run();
+        $path = $mostRecent;
+
+        if (false) {
+            $process = new Process(['asciinema', 'play', $mostRecent, '-s', '2.0', '-i', 0.5]);
+            $process->run();
 
 // executes after the command finishes
-        if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
+            if (!$process->isSuccessful()) {
+                throw new ProcessFailedException($process);
+            }
+
+            echo $process->getOutput();
         }
 
-        echo $process->getOutput();
-
-        dd($_ENV, getenv("CIINE_PATH"), $currentPath, pathinfo(getcwd(), PATHINFO_BASENAME));
 
 //        SCREENSHOW_ENDPOINT=https://show.survos.com/api/asciicasts
 
