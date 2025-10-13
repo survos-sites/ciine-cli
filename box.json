@@ -1,21 +1,16 @@
 {
-    "main": "bin/ciine  ",
     "output": "ciine.phar",
     "directories": [
-        "bin",
         "config",
-        "src",
-        "vendor"
+        "public",
+        "var"
     ],
-    "files": [
-        "composer.json",
-        "composer.lock",
-        ".env"
+    "files-bin": [
+        ".env.local.php"
     ],
-
-    "stub": true,
-    "exclude-composer-files": true,
-    "exclude-dev-files": true,
+    "force-autodiscovery": true,
+    "check-requirements": false,
+    "exclude-composer-files": false,
     "compression": "GZ",
     "algorithm": "SHA256"
 }
