@@ -13,6 +13,7 @@ bin/console about
 ## install humbug/box globally
 
 ```bash
+composer global require symfony/flex
 composer global require humbug/box:dev-main
 ```
 
